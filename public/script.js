@@ -316,14 +316,16 @@ function limpiarListado() {
 
 function actualizarEstadoRegistro(registroIndex, alumnoIndex, campo, valor) {
   fetch('/api/registros/estado', {
-    method: 'PATCH',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ registroIndex, alumnoIndex, campo, valor })
   })
     .then(res => res.json())
     .then(data => {
       if (!data.ok) {
-        console.warn('Error al actualizar estado en servidor:', data);
+        console.warn('⚠ Error al actualizar estado en servidor:', data);
+      } else {
+        console.log('✅ Estado actualizado en servidor:', { registroIndex, alumnoIndex, campo, valor });
       }
     })
     .catch(err => {

@@ -223,20 +223,24 @@ app.post('/api/registros', (req, res) => {
 
 
 // Ruta para actualizar el estado de un checkbox (envío a acceso / retirado)
-app.patch('/api/registros/estado', (req, res) => {
+app.post('/api/registros/estado', (req, res) => {
   const { registroIndex, alumnoIndex, campo, valor } = req.body;
+
+  console.log('📝 Actualizar estado:', { registroIndex, alumnoIndex, campo, valor });
 
   if (
     typeof registroIndex !== 'number' ||
     typeof alumnoIndex !== 'number' ||
     !['enviadoAcceso', 'retirado'].includes(campo)
   ) {
-    return res.status(400).json({ error: 'Datos inválidos para actualizar estado' });
+    console.warn('⚠ Datos inválidos para actualizar estado:', req.body);
+    return res.status(400).json({ ok: false, error: 'Datos inválidos para actualizar estado' });
   }
 
   const reg = registros[registroIndex];
   if (!reg) {
-    return res.status(404).json({ error: 'Registro no encontrado' });
+    console.warn('⚠ Registro no encontrado para índice:', registroIndex);
+    return res.status(404).json({ ok: false, error: 'Registro no encontrado' });
   }
 
   // Asegurar que existan los arrays
@@ -245,6 +249,20 @@ app.patch('/api/registros/estado', (req, res) => {
   }
   if (!Array.isArray(reg.retirado)) {
     reg.retirado = new Array(reg.alumnos.length).fill(false);
+  }
+
+  // Ajustar tamaños si cambia la cantidad de alumnos
+  if (reg.enviadoAcceso.length < reg.alumnos.length) {
+    reg.enviadoAcceso = [
+      ...reg.enviadoAcceso,
+      ...new Array(reg.alumnos.length - reg.enviadoAcceso.length).fill(false)
+    ];
+  }
+  if (reg.retirado.length < reg.alumnos.length) {
+    reg.retirado = [
+      ...reg.retirado,
+      ...new Array(reg.alumnos.length - reg.retirado.length).fill(false)
+    ];
   }
 
   // Actualizar el campo correspondiente
