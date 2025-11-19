@@ -1,0 +1,550 @@
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #e2e8f0;
+    }
+
+    .seccion { display: none; }
+    .activa { display: block; }
+
+    h2 {
+      color: #63b3ed;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .busqueda-container {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .busqueda-container input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #4a5568;
+      border-radius: 10px;
+      font-size: 14px;
+      background-color: #2d3748;
+      color: #e2e8f0;
+      text-transform: uppercase;
+    }
+
+    .busqueda-container button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background-color: #4299e1;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px #4299e1;
+      white-space: nowrap;
+    }
+
+
+
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #4a5568;
+      border-radius: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      background-color: #2d3748;
+      color: #e2e8f0;
+      text-transform: uppercase;
+    }
+
+    button {
+      padding: 10px 24px;
+      margin: 8px 5px;
+      border: none;
+      border-radius: 10px;
+      background-color: #4299e1;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #4299e1;
+    }
+
+    button:hover {
+      background-color: #3182ce;
+      box-shadow: 0 0 16px #63b3ed;
+    }
+
+    #btnMostrarAltaFamilia, #btnAgregarGrupo {
+    	background-color: #68d391;
+    	box-shadow: 0 0 12px #68d391;
+    }
+
+    #btnMostrarAltaFamilia:hover, #btnAgregarGrupo:hover {
+	  background-color: #48bb78; /* Verde un poco más oscuro */
+	  box-shadow: 0 0 16px #9ae6b4;
+    }
+
+
+
+
+	/* Capa oscura que cubre toda la pantalla */
+	.overlay-modal {
+	  position: fixed;
+	  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+	  background: rgba(0, 0, 0, 0.6);
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  z-index: 999;
+	}
+
+		.oculto {
+	  display: none;
+	}
+
+	/* Caja del formulario centrado */
+	.panel-alta-familia {
+	  background: #0f172a;          /* azul oscuro tipo Tailwind slate-900 */
+	  padding: 20px 24px;
+	  border-radius: 12px;
+	  width: min(420px, 90vw);
+	  max-width: 80%;
+	  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+	  border: 1px solid #4b5563;
+	  color: #e5e7eb;
+	}
+
+	.panel-alta-familia h3 {
+	  margin-top: 0;
+	  margin-bottom: 12px;
+	  font-size: 1.1rem;
+	}
+
+	.panel-alta-familia label {
+	  display: block;
+	  margin-bottom: 10px;
+	  font-size: 0.9rem;
+	}
+
+	.panel-alta-familia input {
+	  width: 80%;
+	  margin-top: 4px;
+	  padding: 6px 8px;
+	  border-radius: 6px;
+	  border: 1px solid #374151;
+	  background: #020617;
+	  color: #e5e7eb;
+	}
+
+	.acciones-alta-familia {
+	  display: flex;
+	  justify-content: flex-end;
+	  gap: 8px;
+	  margin-top: 12px;
+	}
+
+	.acciones-alta-familia button {
+	  padding: 6px 12px;
+	  border-radius: 8px;
+	  border: none;
+	  cursor: pointer;
+	  font-size: 0.9rem;
+	}
+
+	#btnCancelarAltaFamilia {
+	  background: #374151;
+	  color: #e5e7eb;
+	}
+
+	#btnAgregarGrupo {
+	  background: #16a34a;
+	  color: #e5e7eb;
+	}
+
+	.msg-ok {
+	  color: #4ade80;
+	  font-size: 0.85rem;
+	}
+
+	.msg-error {
+	  color: #f87171;
+	  font-size: 0.85rem;
+	}
+
+
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+
+  padding: 18px 26px;
+  background: #68d391;
+  color: #fff;
+
+  border-radius: 12px;
+  box-shadow: 0 0 18px #22c55e88; /* glow verde */
+
+  font-size: 1rem;
+  text-align: center;
+
+  backdrop-filter: blur(6px);
+
+  opacity: 0;
+  z-index: 2000;
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.toast.mostrar {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+
+
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    th, td {
+      border: 2px solid #718096;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #edf2f7;
+    }
+
+    th {
+      background-color: #1a202c;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      background-color: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .result-item input {
+      margin-right: 12px;
+    }
+
+    #menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #1a202c;
+  padding: 10px 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    }
+
+    .parpadeo {
+      animation: parpadeo 1s infinite;
+    }
+
+    .retirado {
+      background-color: #5c677d !important;
+    }
+
+    .no-autorizado {
+      background-color: #742a2a !important;
+    }
+
+    @keyframes parpadeo {
+      0% { background-color: #2a4365; }
+      50% { background-color: #822727; }
+      100% { background-color: #2a4365; }
+    }
+
+    @media (max-width: 600px) {
+      .busqueda-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .busqueda-container button {
+        width: 100%;
+      }
+    }
+
+    .tabla-wrapper {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      table {
+        min-width: 600px;
+      }
+    }
+
+    .botones-listado {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+.auto-contenedor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-end;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.auto-input {
+  flex: 0 0 100px; /* Caja más angosta */
+}
+
+.auto-boton {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.auto-boton button {
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1;
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 0 8px #fc8181;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: -60px;
+
+}
+
+.auto-boton button:hover {
+  background-color: #c53030;
+  box-shadow: 0 0 12px #feb2b2;
+}
+
+.boton-rojo {
+  background-color: #e53e3e; /* rojo fuerte */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #e53e3e;
+  padding: 16px 12px;
+  font-size: 14px;
+  line-height: normal;
+}
+
+.boton-rojo:hover {
+  background-color: #c53030;
+  box-shadow: 0 0 16px #feb2b2;
+}
+
+.boton-enviar {
+  padding: 16px 28px;
+  font-size: 16px;
+  margin-top: 30px;
+  display: block;
+}
+
+.boton-enviar {
+  padding: 16px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 30px;
+  background-color: #68d391; /* Verde menta brillante */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 0 12px #68d391;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.boton-enviar:hover {
+  background-color: #48bb78; /* Verde un poco más oscuro */
+  box-shadow: 0 0 16px #9ae6b4;
+}
+
+.bloque-alumnos {
+  background-color: rgba(66, 153, 225, 0.15); /* azul translúcido */
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.bloque-vehiculos {
+  background-color: rgba(72, 187, 120, 0.15); /* verde translúcido */
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.bloque-conductores {
+  background-color: red !important;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  background-color: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+
+.result-item.seleccionado {
+  background-color: rgba(255, 255, 0, 0.15); /* Amarillo suave */
+  box-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+.columna-vehiculo {
+  min-width: 200px;
+  max-width: 300px;
+}
+
+td input[type="checkbox"] {
+  transform: scale(1.6);
+  cursor: pointer;
+  display: block;
+  margin: auto;
+}
+
+body {
+  padding-top: 70px; /* Ajusta este valor según la altura del menú */
+}
+
+
+#login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+  overflow-y: auto; /* por si hace falta scroll */
+}
+
+#login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  z-index: 9999;
+  overflow-y: auto;
+  display: block; /* No usamos flex más */
+  padding-top: 20px; /* Controla qué tan arriba aparece */
+}
+
+
+#login-box {
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+
+#error-message {
+  color: #f56565; /* rojo claro */
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+#loginScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* 👈 Esto lo empuja arriba */
+  padding-top: 40px; /* 👈 Espaciado desde el borde superior */
+  height: auto;
+}
+
+
+    #loginScreen input {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    #loginScreen button {
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 8px #4299e1;
+      transition: all 0.3s ease;
+    }
+
+    #loginScreen button:hover {
+      background-color: #3182ce;
+      box-shadow: 0 0 16px #63b3ed;
+    }
+
+    #appContent {
+      display: none;
+    }
+
+    #bienvenida {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: #9ae6b4;
+    }

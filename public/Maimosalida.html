@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Salidas</title>
+      <script src="/socket.io/socket.io.js"></script>
+      <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+<div id="sessionInfo" style="display: none;"></div>
+
+    
+    <script>
+        const socket = io();
+        
+        socket.on('sessionData', (data) => {
+            document.getElementById('sessionInfo').innerHTML = `
+                <p>Visitas a la página: ${data.visitCount}</p>
+                <p>Conexiones de socket: ${data.socketCount}</p>
+            `;
+        });
+
+    </script>
+
+  <!-- SISTEMA DE INICIO DE SESION -->
+
+<div id="login-container">
+  <div id="login-box">
+
+  <div id="loginScreen">
+    <h2>Inicio de Sesión</h2>
+	<div style="display: flex; gap: 10px; width: 100%;">
+	  <input type="text" id="usuario" placeholder="Nombre de usuario" style="flex: 1;">
+	</div>
+	<div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+	  <input type="password" id="clave" placeholder="Contraseña" style="flex: 1;">
+	  <button type="button" onclick="toggleClave()" style="padding: 10px; border-radius: 10px; background-color: #4a5568; color: white; border: none; cursor: pointer;">👁️</button>
+	</div>
+
+
+	<button onclick="iniciarSesion()">Ingresar</button>
+		<script type="text/javascript">
+			async function getUsers() {
+  try {
+    const response = await fetch('/users');
+    if (!response.ok) {
+      throw new Error('Error en la respuesta del servidor');
+    }
+    const users = await response.json();
+    console.log('Usuarios válidos:', users);
+    // Hacer algo con los usuarios...
+    return users;
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+  }
+}
+
+// Llamar a la función
+getUsers();
+
+		</script>
+<button onclick="getUsers()" style="display: none;">Obtener usuarios</button>
+
+
+    <div id="error-message"></div>
+  </div>
+
+</div>
+</div>
+
+  <div id="appContent">
+    <div id="bienvenida"></div>
+
+
+
+
+  <!-- Todo tu sistema actual (menu, formulario, listado, etc.) va dentro de este div -->
+
+
+  <div id="menu">
+    <button onclick="mostrarSeccion('formulario')">Formulario</button>
+    <button onclick="mostrarSeccion('listado')">Listado</button>
+  </div>
+
+  <div id="formulario" class="seccion activa">
+    <h2>Formulario de Salida</h2>
+    <label for="tipo">Buscar por:</label>
+    <select id="tipo">
+    	 <option value="pariente">Pariente Autorizado</option>
+      <option value="alumno">Alumno/a</option>
+      <option value="vehiculo">Vehículo</option>
+    </select>
+<div class="busqueda-container">
+  <input type="text" id="busqueda" placeholder="Escribí tu búsqueda">
+  <button id="botonBuscar">Buscar</button>
+<button id="btnMostrarAltaFamilia" type="button">Agregar Familia</button>
+
+<!-- esto deberia estar escondido hasta que se cliquee #botonAgregar -->
+
+
+<!-- Overlay modal -->
+<div id="overlayAltaFamilia" class="overlay-modal oculto">
+  <div id="panelAltaFamilia" class="panel-alta-familia">
+    <h3>Agregar nuevo grupo familiar</h3>
+
+    <label>
+      Parientes [separar con coma]:
+      <input id="inputParientes" type="text" placeholder="Ej: LUCY LONGIN, TOMI SOSA">
+    </label>
+
+    <label>
+      Alumnos [separar con coma]:
+      <input id="inputAlumnos" type="text" placeholder="Ej: JOAQUINA SOSA, MAXIMO SOSA">
+    </label>
+
+    <label>
+      Vehículos MM / COLOR / PATENTE [separar con coma]:
+      <input id="inputVehiculos" type="text" placeholder="Ej: TOYOTA HILUX / ROJA / AA 228 PQ">
+    </label>
+
+    <div class="acciones-alta-familia">
+      <button id="btnCancelarAltaFamilia" type="button">Cancelar</button>
+      <button id="btnAgregarGrupo" type="button">Guardar familia</button>
+    </div>
+
+    <div id="mensajeAltaGrupo"></div>
+  </div>
+</div>
+
+
+<!-- esto deberia estar escondido hasta que se cliquee #botonAgregar -->
+
+</div>
+
+    <div id="resultados" style="margin-top: 20px;"></div>
+<div class="auto-contenedor">
+  <div class="auto-input">
+    <label for="numeroAuto">N° de Auto:</label>
+    <input type="number" id="numeroAuto">
+  </div>
+<div class="auto-boton">
+  <button type="button" class="boton-rojo" onclick="mostrarManualInput()">No registrado</button>
+</div>
+
+</div>
+
+<div>
+  <button id="enviar" class="boton-enviar" onclick="guardarRegistro()">Enviar</button>
+</div>
+
+
+
+    <div id="manualInputs" style="margin-top: 20px; display: none;">
+      <label>Alumno/a: <input type="text" id="manualAlumno"></label><br>
+      <label>Conductor: <input type="text" id="manualConductor"></label><br>
+      <label>Vehículo: <input type="text" id="manualVehiculo"></label><br>
+      <label>N° de Auto: <input type="number" id="manualNumero" style="width: 50%;"></label><br>
+      <button onclick="guardarManual()">Agregar a listado</button>
+      <button onclick="cancel()" style="background-color: #e53e3e;">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="listado" class="seccion">
+    <h2>Listado de Registros</h2>
+<div class="botones-listado">
+  <button onclick="exportarCSV()">Exportar a CSV</button>
+  <button onclick="limpiarListado()">Limpiar Listado</button>
+</div>
+
+   <div class="tabla-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 50px;">Envio a Acceso</th>
+        <th style="width: 80px;">N° de Auto</th>
+        <th>Alumno/a</th>
+        <th>Retirado</th>
+        <th>Conductor</th>
+		<th class="columna-vehiculo">Vehículo</th>
+
+      </tr>
+    </thead>
+    <tbody id="tabla-registros"></tbody>
+  </table>
+</div>
+
+  </div>
+
+
+
+  <script src="script.js"></script>
+
+  <div id="toast" class="toast oculto"></div>
+</body>
+</html>

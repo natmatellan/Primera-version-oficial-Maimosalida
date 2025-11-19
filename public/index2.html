@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Categorías</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Nueva Categoría</h1>
+        <div class="form-group">
+            <label for="category">Nombre de la Categoría:</label>
+            <input type="text" id="category" placeholder="Ej: productos, usuarios, etc.">
+        </div>
+        <button onclick="createCategory()">Crear Carpeta</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function createCategory() {
+            const categoryInput = document.getElementById('category');
+            const resultDiv = document.getElementById('result');
+            
+            // Limpiar resultados anteriores
+            resultDiv.style.display = 'none';
+            resultDiv.className = '';
+            
+            const category = categoryInput.value.trim();
+            
+            if (!category) {
+                showResult('Por favor ingresa un nombre de categoría', false);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/model/${encodeURIComponent(category)}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(data.message, true);
+                } else {
+                    showResult(data.message, false);
+                }
+            } catch (error) {
+                showResult(`Error de conexión: ${error.message}`, false);
+            }
+        }
+        
+        function showResult(message, isSuccess) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = isSuccess ? 'success' : 'error';
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

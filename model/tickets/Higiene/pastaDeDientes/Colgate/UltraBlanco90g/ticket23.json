@@ -1,0 +1,19 @@
+{
+  "product": {
+    "category": "Higiene",
+    "subcategory": "pastaDeDientes",
+    "brand": "Colgate",
+    "tickets": [
+      {
+        "mercadoId": "M001",
+        "precio": 7000,
+        "timestamp": "2025-06-17T08:11:58.126Z"
+      },
+      {
+        "mercadoId": "M001",
+        "precio": 7005,
+        "timestamp": "2025-06-17T08:12:18.911Z"
+      }
+    ]
+  }
+}
