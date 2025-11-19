@@ -65,6 +65,9 @@ function guardarRegistrosEnArchivo() {
   try {
     fs.writeFileSync(REGISTROS_FILE, JSON.stringify(registros, null, 2), 'utf8');
     console.log('✅ Registros guardados en', REGISTROS_FILE);
+
+    // 🔔 Avisar a todos los clientes que hubo cambios en el listado
+    io.emit('registrosActualizados');
   } catch (err) {
     console.error('❌ Error al guardar registros:', err);
   }

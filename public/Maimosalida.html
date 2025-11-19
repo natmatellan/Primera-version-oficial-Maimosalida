@@ -12,17 +12,34 @@
 <div id="sessionInfo" style="display: none;"></div>
 
     
-    <script>
-        const socket = io();
-        
-        socket.on('sessionData', (data) => {
-            document.getElementById('sessionInfo').innerHTML = `
-                <p>Visitas a la página: ${data.visitCount}</p>
-                <p>Conexiones de socket: ${data.socketCount}</p>
-            `;
-        });
+<script>
+    const socket = io();
+    
+    socket.on('sessionData', (data) => {
+        document.getElementById('sessionInfo').innerHTML = `
+            <p>Visitas a la página: ${data.visitCount}</p>
+            <p>Conexiones de socket: ${data.socketCount}</p>
+        `;
+    });
 
-    </script>
+    // 🔔 Cuando el servidor avisa que cambiaron los registros,
+    // recargamos la tabla si estamos en la app
+    socket.on('registrosActualizados', () => {
+        const appContent = document.getElementById('appContent');
+        const listado = document.getElementById('listado');
+
+        // Solo recargar si el usuario ya pasó el login
+        if (appContent && appContent.style.display !== 'none') {
+            // Si estás en la pestaña Listado, refrescamos la tabla
+            if (listado && listado.classList.contains('activa')) {
+                if (typeof cargarListado === 'function') {
+                    cargarListado();
+                }
+            }
+        }
+    });
+</script>
+
 
   <!-- SISTEMA DE INICIO DE SESION -->
 
@@ -165,9 +182,11 @@ getUsers();
   <div id="listado" class="seccion">
     <h2>Listado de Registros</h2>
 <div class="botones-listado">
-  <button onclick="exportarCSV()">Exportar a CSV</button>
-  <button onclick="limpiarListado()">Limpiar Listado</button>
+  <button type="button" onclick="exportarCSV()">Exportar a CSV</button>
+  <button type="button" onclick="limpiarListado()">Limpiar Listado</button>
+  <button type="button" onclick="cargarListado()">Actualizar tabla</button>
 </div>
+
 
    <div class="tabla-wrapper">
   <table>
