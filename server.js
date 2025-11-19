@@ -198,16 +198,63 @@ app.post('/api/registros', (req, res) => {
   if (!nuevoRegistro ||
       typeof nuevoRegistro.conductor !== 'string' ||
       typeof nuevoRegistro.vehiculo !== 'string' ||
-      typeof nuevoRegistro.nroAuto !== 'string' && typeof nuevoRegistro.nroAuto !== 'number' ||
+      (typeof nuevoRegistro.nroAuto !== 'string' && typeof nuevoRegistro.nroAuto !== 'number') ||
       !Array.isArray(nuevoRegistro.alumnos)) {
     return res.status(400).json({ error: 'Formato de registro inválido' });
   }
 
-  registros.push(nuevoRegistro);
+  // Normalizar registro y agregar arrays de estado
+  const alumnos = nuevoRegistro.alumnos;
+  const registroNormalizado = {
+    conductor: nuevoRegistro.conductor,
+    vehiculo: nuevoRegistro.vehiculo,
+    nroAuto: String(nuevoRegistro.nroAuto),
+    alumnos,
+    noAutorizado: !!nuevoRegistro.noAutorizado,
+    enviadoAcceso: new Array(alumnos.length).fill(false),
+    retirado: new Array(alumnos.length).fill(false)
+  };
+
+  registros.push(registroNormalizado);
   guardarRegistrosEnArchivo();
 
   res.json({ ok: true, total: registros.length });
 });
+
+
+// Ruta para actualizar el estado de un checkbox (envío a acceso / retirado)
+app.patch('/api/registros/estado', (req, res) => {
+  const { registroIndex, alumnoIndex, campo, valor } = req.body;
+
+  if (
+    typeof registroIndex !== 'number' ||
+    typeof alumnoIndex !== 'number' ||
+    !['enviadoAcceso', 'retirado'].includes(campo)
+  ) {
+    return res.status(400).json({ error: 'Datos inválidos para actualizar estado' });
+  }
+
+  const reg = registros[registroIndex];
+  if (!reg) {
+    return res.status(404).json({ error: 'Registro no encontrado' });
+  }
+
+  // Asegurar que existan los arrays
+  if (!Array.isArray(reg.enviadoAcceso)) {
+    reg.enviadoAcceso = new Array(reg.alumnos.length).fill(false);
+  }
+  if (!Array.isArray(reg.retirado)) {
+    reg.retirado = new Array(reg.alumnos.length).fill(false);
+  }
+
+  // Actualizar el campo correspondiente
+  reg[campo][alumnoIndex] = !!valor;
+
+  guardarRegistrosEnArchivo();
+
+  res.json({ ok: true });
+});
+
 
 // Ruta para limpiar todos los registros
 app.delete('/api/registros', (req, res) => {

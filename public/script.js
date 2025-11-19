@@ -314,6 +314,25 @@ function limpiarListado() {
 }
 
 
+function actualizarEstadoRegistro(registroIndex, alumnoIndex, campo, valor) {
+  fetch('/api/registros/estado', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ registroIndex, alumnoIndex, campo, valor })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) {
+        console.warn('Error al actualizar estado en servidor:', data);
+      }
+    })
+    .catch(err => {
+      console.error('❌ Error al actualizar estado en servidor:', err);
+    });
+}
+
+
+
 function cargarListado() {
   fetch('/api/registros')
     .then(res => res.json())
@@ -321,40 +340,71 @@ function cargarListado() {
       const cuerpo = document.getElementById("tabla-registros");
       cuerpo.innerHTML = "";
 
-      registros.forEach(reg => {
-        reg.alumnos.forEach(alumno => {
+      registros.forEach((reg, iRegistro) => {
+        // Asegurar arrays por si hay registros viejos sin esos campos
+        const enviados = Array.isArray(reg.enviadoAcceso)
+          ? reg.enviadoAcceso
+          : new Array(reg.alumnos.length).fill(false);
+
+        const retirados = Array.isArray(reg.retirado)
+          ? reg.retirado
+          : new Array(reg.alumnos.length).fill(false);
+
+        reg.alumnos.forEach((alumno, iAlumno) => {
           const fila = document.createElement("tr");
           if (reg.noAutorizado) fila.classList.add("no-autorizado");
 
+          // Columna: Envío a acceso
           const tdAcceso = document.createElement("td");
           const cbAcceso = document.createElement("input");
           cbAcceso.type = "checkbox";
+          cbAcceso.checked = !!enviados[iAlumno];
+
+          // Clase visual
+          if (cbAcceso.checked) {
+            fila.classList.add("parpadeo");
+          }
+
           cbAcceso.addEventListener("change", () => {
             fila.classList.toggle("parpadeo", cbAcceso.checked);
+            actualizarEstadoRegistro(iRegistro, iAlumno, 'enviadoAcceso', cbAcceso.checked);
           });
           tdAcceso.appendChild(cbAcceso);
 
+          // Columna: N° de Auto
           const tdAuto = document.createElement("td");
           tdAuto.textContent = reg.nroAuto;
 
+          // Columna: Alumno
           const tdAlumno = document.createElement("td");
           tdAlumno.textContent = alumno.toUpperCase();
 
+          // Columna: Retirado
           const tdRetirado = document.createElement("td");
           const cbRetirado = document.createElement("input");
           cbRetirado.type = "checkbox";
+          cbRetirado.checked = !!retirados[iAlumno];
+
+          if (cbRetirado.checked) {
+            fila.classList.add("retirado");
+          }
+
           cbRetirado.addEventListener("change", () => {
             fila.classList.toggle("retirado", cbRetirado.checked);
+            actualizarEstadoRegistro(iRegistro, iAlumno, 'retirado', cbRetirado.checked);
           });
           tdRetirado.appendChild(cbRetirado);
 
+          // Columna: Conductor
           const tdConductor = document.createElement("td");
           tdConductor.textContent = reg.conductor;
 
+          // Columna: Vehículo
           const tdVehiculo = document.createElement("td");
           tdVehiculo.textContent = reg.vehiculo;
           tdVehiculo.classList.add("columna-vehiculo");
 
+          // Armar fila
           fila.appendChild(tdAcceso);
           fila.appendChild(tdAuto);
           fila.appendChild(tdAlumno);
@@ -371,6 +421,7 @@ function cargarListado() {
       alert("No se pudieron cargar los registros desde el servidor.");
     });
 }
+
 
 
     document.getElementById("busqueda").addEventListener("keypress", function (e) {
