@@ -218,71 +218,106 @@ function mostrarToast(mensaje) {
       if (e.key === "Enter") buscar();
     });
 
-    function guardarRegistro() {
-      const numero = document.getElementById("numeroAuto").value.trim();
-      if (!seleccionados.conductor || !seleccionados.vehiculo || !numero || seleccionados.alumnos.length === 0) {
-        alert("Por favor completá todos los campos obligatorios.");
-        return;
-      }
-
-      const registro = {
-        conductor: seleccionados.conductor.toUpperCase(),
-        vehiculo: seleccionados.vehiculo.toUpperCase(),
-        nroAuto: numero,
-        alumnos: seleccionados.alumnos.map(a => a.toUpperCase())
-      };
-
-      const registros = JSON.parse(localStorage.getItem("registrosSalida")) || [];
-      registros.push(registro);
-      localStorage.setItem("registrosSalida", JSON.stringify(registros));
-      alert("Registro guardado correctamente.");
-
-      seleccionados = { conductor: null, alumnos: [], vehiculo: null };
-      document.getElementById("resultados").innerHTML = "";
-      document.getElementById("numeroAuto").value = "";
-    }
-
-function exportarCSV() {
-  const registros = JSON.parse(localStorage.getItem("registrosSalida")) || [];
-  if (registros.length === 0) {
-    alert("No hay registros para exportar.");
+function guardarRegistro() {
+  const numero = document.getElementById("numeroAuto").value.trim();
+  if (!seleccionados.conductor || !seleccionados.vehiculo || !numero || seleccionados.alumnos.length === 0) {
+    alert("Por favor completá todos los campos obligatorios.");
     return;
   }
 
-  let csv = "Conductor,Vehículo,N° de Auto,Alumno/a\n";
-  registros.forEach(reg => {
-    reg.alumnos.forEach(alumno => {
-      csv += `${reg.conductor},${reg.vehiculo},${reg.nroAuto},${alumno}\n`;
+  const registro = {
+    conductor: seleccionados.conductor.toUpperCase(),
+    vehiculo: seleccionados.vehiculo.toUpperCase(),
+    nroAuto: String(numero),
+    alumnos: seleccionados.alumnos.map(a => a.toUpperCase())
+  };
+
+  fetch('/api/registros', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(registro)
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        mostrarToast("Registro guardado correctamente.");
+        // Si estás en la pestaña listado, recargamos la tabla
+        cargarListado();
+      } else {
+        alert("Hubo un problema al guardar el registro en el servidor.");
+        console.warn(data);
+      }
+    })
+    .catch(err => {
+      console.error('❌ Error al guardar registro:', err);
+      alert("No se pudo guardar el registro en el servidor.");
     });
-  });
 
-  // Creamos el archivo
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-
-  // Creamos el enlace visible (para que funcione en móviles)
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "salidas.csv";
-  a.style.display = "none";
-
-  document.body.appendChild(a);
-  a.click(); // ← esto debe ejecutarse por una acción directa (como un botón)
-  document.body.removeChild(a);
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  // Reset selección y formulario
+  seleccionados = { conductor: null, alumnos: [], vehiculo: null };
+  document.getElementById("resultados").innerHTML = "";
+  document.getElementById("numeroAuto").value = "";
 }
 
 
-    function limpiarListado() {
-      if (confirm("¿Estás seguro de que querés borrar todos los registros?")) {
-        localStorage.removeItem("registrosSalida");
-        cargarListado();
+function exportarCSV() {
+  fetch('/api/registros')
+    .then(res => res.json())
+    .then(registros => {
+      if (!registros || registros.length === 0) {
+        alert("No hay registros para exportar.");
+        return;
       }
-    }
 
-    function cargarListado() {
-      const registros = JSON.parse(localStorage.getItem("registrosSalida")) || [];
+      let csv = "Conductor,Vehículo,N° de Auto,Alumno/a\n";
+      registros.forEach(reg => {
+        reg.alumnos.forEach(alumno => {
+          csv += `${reg.conductor},${reg.vehiculo},${reg.nroAuto},${alumno}\n`;
+        });
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "salidas.csv";
+      a.style.display = "none";
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    })
+    .catch(err => {
+      console.error('❌ Error al exportar CSV:', err);
+      alert("No se pudieron obtener los registros para exportar.");
+    });
+}
+
+
+
+function limpiarListado() {
+  if (!confirm("¿Estás seguro de que querés borrar todos los registros?")) return;
+
+  fetch('/api/registros', { method: 'DELETE' })
+    .then(res => res.json())
+    .then(() => {
+      cargarListado();
+      mostrarToast("Listado limpiado.");
+    })
+    .catch(err => {
+      console.error('❌ Error al limpiar registros:', err);
+      alert("No se pudo limpiar el listado en el servidor.");
+    });
+}
+
+
+function cargarListado() {
+  fetch('/api/registros')
+    .then(res => res.json())
+    .then(registros => {
       const cuerpo = document.getElementById("tabla-registros");
       cuerpo.innerHTML = "";
 
@@ -320,7 +355,6 @@ function exportarCSV() {
           tdVehiculo.textContent = reg.vehiculo;
           tdVehiculo.classList.add("columna-vehiculo");
 
-
           fila.appendChild(tdAcceso);
           fila.appendChild(tdAuto);
           fila.appendChild(tdAlumno);
@@ -331,7 +365,13 @@ function exportarCSV() {
           cuerpo.appendChild(fila);
         });
       });
-    }
+    })
+    .catch(err => {
+      console.error('❌ Error al cargar registros:', err);
+      alert("No se pudieron cargar los registros desde el servidor.");
+    });
+}
+
 
     document.getElementById("busqueda").addEventListener("keypress", function (e) {
       if (e.key === "Enter") buscar();
@@ -478,33 +518,51 @@ function mostrarBloquesRelacionados(grupo) {
       document.getElementById("manualInputs").style.display = "block";
     }
 
-    function guardarManual() {
-      const alumno = document.getElementById("manualAlumno").value.trim();
-      const conductor = document.getElementById("manualConductor").value.trim();
-      const vehiculo = document.getElementById("manualVehiculo").value.trim();
-      const numero = document.getElementById("manualNumero").value.trim();
-      if (!alumno || !conductor || !vehiculo || !numero) {
-        alert("Completá todos los campos para registrar manualmente.");
-        return;
+function guardarManual() {
+  const alumno = document.getElementById("manualAlumno").value.trim();
+  const conductor = document.getElementById("manualConductor").value.trim();
+  const vehiculo = document.getElementById("manualVehiculo").value.trim();
+  const numero = document.getElementById("manualNumero").value.trim();
+  if (!alumno || !conductor || !vehiculo || !numero) {
+    alert("Completá todos los campos para registrar manualmente.");
+    return;
+  }
+
+  const registro = {
+    conductor: conductor.toUpperCase(),
+    vehiculo: vehiculo.toUpperCase(),
+    nroAuto: String(numero),
+    alumnos: [alumno.toUpperCase()],
+    noAutorizado: true
+  };
+
+  fetch('/api/registros', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(registro)
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        mostrarToast("Registro manual guardado.");
+        cargarListado();
+      } else {
+        alert("Hubo un problema al guardar el registro manual.");
+        console.warn(data);
       }
+    })
+    .catch(err => {
+      console.error('❌ Error al guardar registro manual:', err);
+      alert("No se pudo guardar el registro manual en el servidor.");
+    });
 
-      const registros = JSON.parse(localStorage.getItem("registrosSalida")) || [];
-      registros.push({
-        conductor: conductor.toUpperCase(),
-        vehiculo: vehiculo.toUpperCase(),
-        nroAuto: numero,
-        alumnos: [alumno.toUpperCase()],
-        noAutorizado: true
-      });
-      localStorage.setItem("registrosSalida", JSON.stringify(registros));
+  document.getElementById("manualAlumno").value = "";
+  document.getElementById("manualConductor").value = "";
+  document.getElementById("manualVehiculo").value = "";
+  document.getElementById("manualNumero").value = "";
+  document.getElementById("manualInputs").style.display = "none";
+}
 
-      document.getElementById("manualAlumno").value = "";
-      document.getElementById("manualConductor").value = "";
-      document.getElementById("manualVehiculo").value = "";
-      document.getElementById("manualNumero").value = "";
-      document.getElementById("manualInputs").style.display = "none";
-      cargarListado();
-    }
 
     function cancel() {
             document.getElementById("manualInputs").style.display = "none";

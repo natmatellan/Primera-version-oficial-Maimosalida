@@ -41,6 +41,35 @@ io.use(sharedSession(session({
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'familias.json');
 
+
+// Archivo donde se van a guardar los registros
+const REGISTROS_FILE = path.join(DATA_DIR, 'registros.json');
+
+// Cargar registros desde el archivo (si existe)
+let registros = [];
+
+try {
+  if (fs.existsSync(REGISTROS_FILE)) {
+    const rawReg = fs.readFileSync(REGISTROS_FILE, 'utf8');
+    registros = JSON.parse(rawReg || '[]');
+  } else {
+    registros = [];
+  }
+  console.log(`📂 Registros cargados: ${registros.length}`);
+} catch (err) {
+  console.error('Error al leer registros.json:', err);
+  registros = [];
+}
+
+function guardarRegistrosEnArchivo() {
+  try {
+    fs.writeFileSync(REGISTROS_FILE, JSON.stringify(registros, null, 2), 'utf8');
+    console.log('✅ Registros guardados en', REGISTROS_FILE);
+  } catch (err) {
+    console.error('❌ Error al guardar registros:', err);
+  }
+}
+
 // Asegurar que exista la carpeta data
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR);
@@ -143,6 +172,8 @@ app.get('/api/familias', (req, res) => {
 app.post('/api/familias', (req, res) => {
   const nuevoGrupo = req.body;
 
+
+
   // Validación mínima
   if (!nuevoGrupo || !Array.isArray(nuevoGrupo.parientes) || !Array.isArray(nuevoGrupo.alumnos)) {
     return res.status(400).json({ error: 'Formato de familia inválido' });
@@ -152,4 +183,35 @@ app.post('/api/familias', (req, res) => {
   guardarFamiliasEnArchivo();
 
   res.json({ ok: true, total: familias.length });
+});
+
+// Ruta para obtener todos los registros
+app.get('/api/registros', (req, res) => {
+  res.json(registros);
+});
+
+// Ruta para agregar un registro nuevo
+app.post('/api/registros', (req, res) => {
+  const nuevoRegistro = req.body;
+
+  // Validación mínima
+  if (!nuevoRegistro ||
+      typeof nuevoRegistro.conductor !== 'string' ||
+      typeof nuevoRegistro.vehiculo !== 'string' ||
+      typeof nuevoRegistro.nroAuto !== 'string' && typeof nuevoRegistro.nroAuto !== 'number' ||
+      !Array.isArray(nuevoRegistro.alumnos)) {
+    return res.status(400).json({ error: 'Formato de registro inválido' });
+  }
+
+  registros.push(nuevoRegistro);
+  guardarRegistrosEnArchivo();
+
+  res.json({ ok: true, total: registros.length });
+});
+
+// Ruta para limpiar todos los registros
+app.delete('/api/registros', (req, res) => {
+  registros = [];
+  guardarRegistrosEnArchivo();
+  res.json({ ok: true });
 });
