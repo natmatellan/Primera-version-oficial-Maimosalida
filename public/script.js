@@ -1,35 +1,51 @@
 //SISTEMA JS DE INICIO DE SESION
 
-function iniciarSesion() {
- const usernameInput = document.getElementById("usuario").value.trim();
-const passwordInput = document.getElementById("clave").value;
+// SISTEMA JS DE INICIO DE SESION
 
+async function iniciarSesion() {
+  const usernameInput = document.getElementById("usuario").value.trim();
+  const passwordInput = document.getElementById("clave").value;
   const errorDiv = document.getElementById("error-message");
 
-  const usuariosValidos = {
-    "admin": "1234",
-    "LucasHubscher": "kabat85",
-    "lucas": "pass123",
-    "carla": "clave456",
-    "mariana": "mariana2024"
-  };
+  errorDiv.textContent = "";
 
+  if (!usernameInput || !passwordInput) {
+    errorDiv.textContent = "Completá usuario y contraseña.";
+    return;
+  }
 
-  if (usuariosValidos[usernameInput]) {
-    if (usuariosValidos[usernameInput] === passwordInput) {
-      // Ocultamos login y mostramos el sistema
-      document.getElementById("login-container").style.display = "none";
-  document.getElementById("appContent").style.display = "block";
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        usuario: usernameInput,
+        clave: passwordInput
+      })
+    });
 
-      document.getElementById("bienvenida").textContent = `Bienvenido ${usernameInput}`;
-      errorDiv.textContent = ""; // limpiamos cualquier error previo
-    } else {
-      errorDiv.textContent = "Contraseña incorrecta.";
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      errorDiv.textContent = data.message || "Usuario o contraseña incorrectos.";
+      return;
     }
-  } else {
-    errorDiv.textContent = "Usuario no encontrado.";
+
+    // Login OK: mostramos la app
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("appContent").style.display = "block";
+
+    const nombreParaMostrar = data.nombre || usernameInput;
+    document.getElementById("bienvenida").textContent = `Bienvenido ${nombreParaMostrar}`;
+
+  } catch (error) {
+    console.error("Error en login:", error);
+    errorDiv.textContent = "Error de conexión con el servidor.";
   }
 }
+
 
 function toggleClave() {
   const input = document.getElementById("clave");

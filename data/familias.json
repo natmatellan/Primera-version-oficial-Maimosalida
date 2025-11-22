@@ -11,5 +11,16 @@
     "vehiculos": [
       "toyota hilux / roja / aa 214 rj"
     ]
+  },
+  {
+    "parientes": [
+      "ivan matellan"
+    ],
+    "alumnos": [
+      "athain matellan"
+    ],
+    "vehiculos": [
+      "ford ranger / gris / aa 982 kd"
+    ]
   }
 ]

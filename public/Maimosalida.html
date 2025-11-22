@@ -58,27 +58,7 @@
 
 
 	<button onclick="iniciarSesion()">Ingresar</button>
-		<script type="text/javascript">
-			async function getUsers() {
-  try {
-    const response = await fetch('/users');
-    if (!response.ok) {
-      throw new Error('Error en la respuesta del servidor');
-    }
-    const users = await response.json();
-    console.log('Usuarios válidos:', users);
-    // Hacer algo con los usuarios...
-    return users;
-  } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-  }
-}
 
-// Llamar a la función
-getUsers();
-
-		</script>
-<button onclick="getUsers()" style="display: none;">Obtener usuarios</button>
 
 
     <div id="error-message"></div>

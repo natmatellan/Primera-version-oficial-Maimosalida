@@ -147,23 +147,80 @@ server.listen(PORT, () => {
 });
 
 
-// Datos de usuarios válidos
+// Usuarios válidos SOLO en el servidor
+// Podés agregar más acá
 const usuariosValidos = {
-  "admin": "1234",
-  "LucasHubscher": "kabat85",
-  "lucas": "pass123",
-  "carla": "clave456",
-  "mariana": "sergioSalame123"
+  Direccion: {
+    password: "maimodire750",
+    nombre: "Administrador",
+    rol: "admin"
+  },
+  LucasHubscher: {
+    password: "kabat85",
+    nombre: "Lucas Hubscher",
+    rol: "admin"
+  },
+  Jerocorrea: {
+    password: "kukannabis2026",
+    nombre: "Jero Correa",
+    rol: "operador"
+  },
+  carla: {
+    password: "clave456",
+    nombre: "Carla",
+    rol: "operador"
+  },
+  mariana: {
+    password: "sergioSalame123",
+    nombre: "Mariana",
+    rol: "operador"
+  },
+
+  // 👉 Ejemplos de usuarios nuevos (podés cambiarlos)
+  Nat: {
+    password: "nat2024",
+    nombre: "Nat",
+    rol: "operador"
+  },
+  acceso1: {
+    password: "acceso123",
+    nombre: "Puesto Acceso 1",
+    rol: "operador"
+  }
 };
 
-// Ruta para obtener usuarios
-app.get('/users', (req, res) => {
-  res.json(usuariosValidos);
+
+// Login simple: valida usuario/clave en el servidor
+app.post('/api/login', (req, res) => {
+  const { usuario, clave } = req.body || {};
+
+  if (!usuario || !clave) {
+    return res.status(400).json({
+      ok: false,
+      message: "Faltan usuario o contraseña"
+    });
+  }
+
+  const user = usuariosValidos[usuario];
+
+  if (!user || user.password !== clave) {
+    return res.status(401).json({
+      ok: false,
+      message: "Usuario o contraseña incorrectos"
+    });
+  }
+
+  // (En la versión pro después podemos guardar en la sesión)
+  // req.session.usuario = { username: usuario, rol: user.rol };
+
+  return res.json({
+    ok: true,
+    usuario,
+    nombre: user.nombre,
+    rol: user.rol
+  });
 });
 
-app.post('/users', (req, res) => {
-  console.log(req.body);
-});
 
 
 // Ruta para obtener todas las familias

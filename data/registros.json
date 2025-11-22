@@ -1,0 +1,20 @@
+[
+  {
+    "conductor": "LUCY LONGIN",
+    "vehiculo": "TOYOTA HILUX / ROJA / AA 214 RJ",
+    "nroAuto": "1",
+    "alumnos": [
+      "JOAQUINA SOSA",
+      "MAXIMO SOSA"
+    ],
+    "noAutorizado": false,
+    "enviadoAcceso": [
+      false,
+      false
+    ],
+    "retirado": [
+      false,
+      false
+    ]
+  }
+]
