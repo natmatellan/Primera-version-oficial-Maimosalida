@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const socketio = require('socket.io');
 const http = require('http');
+const nodemailer = require('nodemailer');
 
 // Configuración de la aplicación Express
 const app = express();
@@ -44,6 +45,40 @@ const DATA_FILE = path.join(DATA_DIR, 'familias.json');
 
 // Archivo donde se van a guardar los registros
 const REGISTROS_FILE = path.join(DATA_DIR, 'registros.json');
+
+
+// Configuración de mail (usar env vars en producción)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,   // ej: 'smtp.gmail.com'
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER, // tu mail
+    pass: process.env.SMTP_PASS  // tu contraseña o app password
+  }
+});
+
+// Helper para enviar backup de familias
+async function enviarBackupFamiliasPorMail() {
+  const contenido = JSON.stringify(familias, null, 2);
+
+  await transporter.sendMail({
+    from: `"Maimosalida" <${process.env.SMTP_USER}>`,
+    to: 'nat.matellan@gmail.com',  // ← poné acá tu mail
+    subject: 'Backup familias actualizado',
+    text: 'Adjunto el backup actual de familias.json',
+    attachments: [
+      {
+        filename: 'familias.json',
+        content: contenido
+      }
+    ]
+  });
+
+  console.log('📧 Backup de familias enviado por mail');
+}
+
+
 
 // Cargar registros desde el archivo (si existe)
 let registros = [];
@@ -228,11 +263,10 @@ app.get('/api/familias', (req, res) => {
   res.json(familias);
 });
 
+
 // Ruta para agregar una familia nueva
-app.post('/api/familias', (req, res) => {
+app.post('/api/familias', async (req, res) => {
   const nuevoGrupo = req.body;
-
-
 
   // Validación mínima
   if (!nuevoGrupo || !Array.isArray(nuevoGrupo.parientes) || !Array.isArray(nuevoGrupo.alumnos)) {
@@ -242,8 +276,42 @@ app.post('/api/familias', (req, res) => {
   familias.push(nuevoGrupo);
   guardarFamiliasEnArchivo();
 
+  // intentamos enviar el mail, pero no rompemos la respuesta si falla
+  enviarBackupFamiliasPorMail()
+    .then(() => console.log('📧 Backup enviado tras alta de familia'))
+    .catch(err => console.error('❌ Error enviando backup por mail:', err));
+
   res.json({ ok: true, total: familias.length });
 });
+
+
+
+async function enviarBackupFamiliasPorMail() {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('📭 SMTP no configurado, no se envía mail (modo local)');
+    return;
+  }
+
+  const contenido = JSON.stringify(familias, null, 2);
+
+  await transporter.sendMail({
+    from: `"Maimosalida" <${process.env.SMTP_USER}>`,
+    to: 'nat.matellan@gmail.com',
+    subject: 'Backup familias actualizado',
+    text: 'Adjunto el backup actual de familias.json',
+    attachments: [
+      {
+        filename: 'familias.json',
+        content: contenido
+      }
+    ]
+  });
+
+  console.log('📧 Backup de familias enviado por mail');
+}
+
+
+
 
 // Ruta para obtener todos los registros
 app.get('/api/registros', (req, res) => {
