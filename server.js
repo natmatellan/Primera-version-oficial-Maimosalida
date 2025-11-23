@@ -4,6 +4,10 @@ const socketio = require('socket.io');
 const http = require('http');
 const nodemailer = require('nodemailer');
 
+
+
+
+
 // Configuración de la aplicación Express
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +16,54 @@ const fs = require('fs');
 const path = require('path');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
+const nodemailer = require('nodemailer');
+
+
+// Configuración de mail (usar env vars en producción)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,   // ej: 'smtp.gmail.com'
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER, // tu mail
+    pass: process.env.SMTP_PASS  // app password
+  }
+});
+
+// Helper para enviar backup de familias
+async function enviarBackupFamiliasPorMail() {
+  // Si falta algo, no intentamos enviar
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('📭 SMTP no configurado, no se envía mail (modo local / faltan env vars)');
+    return;
+  }
+
+  try {
+    const contenido = JSON.stringify(familias, null, 2);
+
+    console.log('✉️ Intentando enviar backup de familias a:', 'nat.matellan@gmail.com');
+
+    const info = await transporter.sendMail({
+      from: `"Maimosalida" <${process.env.SMTP_USER}>`,
+      to: 'nat.matellan@gmail.com',  // ← tu mail fijo
+      subject: 'Backup familias actualizado',
+      text: 'Adjunto el backup actual de familias.json',
+      attachments: [
+        {
+          filename: 'familias.json',
+          content: contenido
+        }
+      ]
+    });
+
+    console.log('📧 Backup de familias enviado por mail. messageId:', info.messageId);
+  } catch (err) {
+    console.error('❌ Error enviando backup por mail:', err.message || err);
+  }
+}
 
 
 
@@ -47,36 +99,7 @@ const DATA_FILE = path.join(DATA_DIR, 'familias.json');
 const REGISTROS_FILE = path.join(DATA_DIR, 'registros.json');
 
 
-// Configuración de mail (usar env vars en producción)
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,   // ej: 'smtp.gmail.com'
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER, // tu mail
-    pass: process.env.SMTP_PASS  // tu contraseña o app password
-  }
-});
 
-// Helper para enviar backup de familias
-async function enviarBackupFamiliasPorMail() {
-  const contenido = JSON.stringify(familias, null, 2);
-
-  await transporter.sendMail({
-    from: `"Maimosalida" <${process.env.SMTP_USER}>`,
-    to: 'nat.matellan@gmail.com',  // ← poné acá tu mail
-    subject: 'Backup familias actualizado',
-    text: 'Adjunto el backup actual de familias.json',
-    attachments: [
-      {
-        filename: 'familias.json',
-        content: contenido
-      }
-    ]
-  });
-
-  console.log('📧 Backup de familias enviado por mail');
-}
 
 
 
@@ -276,13 +299,14 @@ app.post('/api/familias', async (req, res) => {
   familias.push(nuevoGrupo);
   guardarFamiliasEnArchivo();
 
-  // intentamos enviar el mail, pero no rompemos la respuesta si falla
+  // Enviar mail, pero sin romper la respuesta si falla
   enviarBackupFamiliasPorMail()
-    .then(() => console.log('📧 Backup enviado tras alta de familia'))
-    .catch(err => console.error('❌ Error enviando backup por mail:', err));
+    .then(() => console.log('📨 Proceso de backup por mail terminado'))
+    .catch(err => console.error('❌ Error inesperado en backup por mail:', err));
 
   res.json({ ok: true, total: familias.length });
 });
+
 
 
 
