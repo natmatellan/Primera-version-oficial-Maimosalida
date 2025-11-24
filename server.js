@@ -18,10 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-
-const nodemailer = require('nodemailer');
-
-
 // Configuración de mail (usar env vars en producción)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,   // ej: 'smtp.gmail.com'
@@ -310,29 +306,6 @@ app.post('/api/familias', async (req, res) => {
 
 
 
-async function enviarBackupFamiliasPorMail() {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log('📭 SMTP no configurado, no se envía mail (modo local)');
-    return;
-  }
-
-  const contenido = JSON.stringify(familias, null, 2);
-
-  await transporter.sendMail({
-    from: `"Maimosalida" <${process.env.SMTP_USER}>`,
-    to: 'nat.matellan@gmail.com',
-    subject: 'Backup familias actualizado',
-    text: 'Adjunto el backup actual de familias.json',
-    attachments: [
-      {
-        filename: 'familias.json',
-        content: contenido
-      }
-    ]
-  });
-
-  console.log('📧 Backup de familias enviado por mail');
-}
 
 
 
