@@ -22,17 +22,5 @@
     "vehiculos": [
       "ford ranger / gris / aa 982 kd"
     ]
-  },
-  {
-    "parientes": [
-      "parent1.1"
-    ],
-    "alumnos": [
-      "child1.1",
-      "child1.2"
-    ],
-    "vehiculos": [
-      "mm1.1 / color1.1 / patente1.1"
-    ]
   }
 ]

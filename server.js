@@ -3,6 +3,7 @@ const session = require('express-session');
 const socketio = require('socket.io');
 const http = require('http');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 
 
@@ -18,20 +19,46 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Configuración de mail (usar env vars en producción)
+// Detectar si estamos en Render (producción)
+const isRender = !!process.env.RENDER;
+
+// ----------------- CONFIGURACIÓN SMTP -----------------
+// Configuración de mail (usar env vars en producción/local)
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,   // ej: 'smtp.gmail.com'
-  port: 587,
-  secure: false,
+  host: process.env.SMTP_HOST,                  
+  port: Number(process.env.SMTP_PORT) || 587,   
+  secure: process.env.SMTP_SECURE === 'true',   
   auth: {
-    user: process.env.SMTP_USER, // tu mail
-    pass: process.env.SMTP_PASS  // app password
+    user: process.env.SMTP_USER,                
+    pass: process.env.SMTP_PASS                 
   }
 });
 
-// Helper para enviar backup de familias
+
+if (!isRender) {
+    // MODO LOCAL: sólo intentamos configurar SMTP si hay credenciales
+    const smtpUser = process.env.MAIL_USER;
+    const smtpPass = process.env.MAIL_PASS;
+
+    if (smtpUser && smtpPass) {
+        transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: smtpUser,
+                pass: smtpPass
+            }
+        });
+
+        console.log("📬 SMTP configurado en modo LOCAL");
+    } else {
+        console.log("📭 SMTP no configurado en LOCAL (faltan MAIL_USER o MAIL_PASS)");
+    }
+} else {
+    console.log("📪 Servidor detectado en Render → envío de mails DESACTIVADO");
+}
+
+// ----------------- FUNCIÓN PARA ENVIAR BACKUP -----------------
 async function enviarBackupFamiliasPorMail() {
-  // Si falta algo, no intentamos enviar
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log('📭 SMTP no configurado, no se envía mail (modo local / faltan env vars)');
     return;
@@ -44,7 +71,7 @@ async function enviarBackupFamiliasPorMail() {
 
     const info = await transporter.sendMail({
       from: `"Maimosalida" <${process.env.SMTP_USER}>`,
-      to: 'nat.matellan@gmail.com',  // ← tu mail fijo
+      to: 'nat.matellan@gmail.com',
       subject: 'Backup familias actualizado',
       text: 'Adjunto el backup actual de familias.json',
       attachments: [
@@ -60,6 +87,7 @@ async function enviarBackupFamiliasPorMail() {
     console.error('❌ Error enviando backup por mail:', err.message || err);
   }
 }
+
 
 
 
@@ -302,6 +330,7 @@ app.post('/api/familias', async (req, res) => {
 
   res.json({ ok: true, total: familias.length });
 });
+
 
 
 
