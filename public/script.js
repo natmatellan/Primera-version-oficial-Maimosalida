@@ -359,8 +359,8 @@ function cargarListado() {
       cuerpo.innerHTML = "";
 
       registros.forEach((reg, iRegistro) => {
-        // Asegurar arrays por si hay registros viejos sin esos campos
-        const enviados = Array.isArray(reg.enviadoAcceso)
+        // Asegurar arrays por si hay registros viejos sin estos campos
+        const enviados  = Array.isArray(reg.enviadoAcceso)
           ? reg.enviadoAcceso
           : new Array(reg.alumnos.length).fill(false);
 
@@ -368,17 +368,23 @@ function cargarListado() {
           ? reg.retirado
           : new Array(reg.alumnos.length).fill(false);
 
+        // "Estado general" de retirado: si alguno está retirado, consideramos el grupo retirado
+        const retiradoGeneral = retirados.some(v => !!v);
+
         reg.alumnos.forEach((alumno, iAlumno) => {
           const fila = document.createElement("tr");
           if (reg.noAutorizado) fila.classList.add("no-autorizado");
+          if (retiradoGeneral)  fila.classList.add("retirado");
 
-          // Columna: Envío a acceso
+          // Guardamos a qué registro pertenece esta fila (para marcar todas luego)
+          fila.dataset.reg = iRegistro;
+
+          // === 1) Enviado a acceso (por alumno) ===
           const tdAcceso = document.createElement("td");
           const cbAcceso = document.createElement("input");
           cbAcceso.type = "checkbox";
           cbAcceso.checked = !!enviados[iAlumno];
 
-          // Clase visual
           if (cbAcceso.checked) {
             fila.classList.add("parpadeo");
           }
@@ -387,48 +393,65 @@ function cargarListado() {
             fila.classList.toggle("parpadeo", cbAcceso.checked);
             actualizarEstadoRegistro(iRegistro, iAlumno, 'enviadoAcceso', cbAcceso.checked);
           });
+
           tdAcceso.appendChild(cbAcceso);
+          fila.appendChild(tdAcceso);
 
-          // Columna: N° de Auto
-          const tdAuto = document.createElement("td");
-          tdAuto.textContent = reg.nroAuto;
-
-          // Columna: Alumno
-          const tdAlumno = document.createElement("td");
-          tdAlumno.textContent = alumno.toUpperCase();
-
-          // Columna: Retirado
-          const tdRetirado = document.createElement("td");
-          const cbRetirado = document.createElement("input");
-          cbRetirado.type = "checkbox";
-          cbRetirado.checked = !!retirados[iAlumno];
-
-          if (cbRetirado.checked) {
-            fila.classList.add("retirado");
+          // === 2) N° AUTO (fusionado) ===
+          if (iAlumno === 0) {
+            const tdAuto = document.createElement("td");
+            tdAuto.textContent = reg.nroAuto;
+            tdAuto.rowSpan = reg.alumnos.length;
+            fila.appendChild(tdAuto);
           }
 
-          cbRetirado.addEventListener("change", () => {
-            fila.classList.toggle("retirado", cbRetirado.checked);
-            actualizarEstadoRegistro(iRegistro, iAlumno, 'retirado', cbRetirado.checked);
-          });
-          tdRetirado.appendChild(cbRetirado);
-
-          // Columna: Conductor
-          const tdConductor = document.createElement("td");
-          tdConductor.textContent = reg.conductor;
-
-          // Columna: Vehículo
-          const tdVehiculo = document.createElement("td");
-          tdVehiculo.textContent = reg.vehiculo;
-          tdVehiculo.classList.add("columna-vehiculo");
-
-          // Armar fila
-          fila.appendChild(tdAcceso);
-          fila.appendChild(tdAuto);
+          // === 3) Alumno (por alumno) ===
+          const tdAlumno = document.createElement("td");
+          tdAlumno.textContent = alumno.toUpperCase();
           fila.appendChild(tdAlumno);
-          fila.appendChild(tdRetirado);
-          fila.appendChild(tdConductor);
-          fila.appendChild(tdVehiculo);
+
+          // === 4) RETIRADO (fusionado en un único checkbox) ===
+          if (iAlumno === 0) {
+            const tdRet = document.createElement("td");
+            tdRet.rowSpan = reg.alumnos.length;
+
+            const cbRet = document.createElement("input");
+            cbRet.type = "checkbox";
+            cbRet.checked = retiradoGeneral;
+
+            cbRet.addEventListener("change", () => {
+              const nuevoValor = cbRet.checked;
+
+              // Marcar/desmarcar todas las filas del grupo visualmente
+              const filasGrupo = cuerpo.querySelectorAll(`tr[data-reg="${iRegistro}"]`);
+              filasGrupo.forEach(f => f.classList.toggle("retirado", nuevoValor));
+
+              // Actualizar en el servidor el campo 'retirado' de todos los alumnos del registro
+              reg.alumnos.forEach((_, idx) => {
+                actualizarEstadoRegistro(iRegistro, idx, 'retirado', nuevoValor);
+              });
+            });
+
+            tdRet.appendChild(cbRet);
+            fila.appendChild(tdRet);
+          }
+
+          // === 5) Conductor (fusionado) ===
+          if (iAlumno === 0) {
+            const tdConductor = document.createElement("td");
+            tdConductor.textContent = reg.conductor;
+            tdConductor.rowSpan = reg.alumnos.length;
+            fila.appendChild(tdConductor);
+          }
+
+          // === 6) Vehículo (fusionado) ===
+          if (iAlumno === 0) {
+            const tdVehiculo = document.createElement("td");
+            tdVehiculo.textContent = reg.vehiculo;
+            tdVehiculo.classList.add("columna-vehiculo");
+            tdVehiculo.rowSpan = reg.alumnos.length;
+            fila.appendChild(tdVehiculo);
+          }
 
           cuerpo.appendChild(fila);
         });

@@ -9,12 +9,30 @@
     ],
     "noAutorizado": false,
     "enviadoAcceso": [
-      false,
-      false
+      true,
+      true
     ],
     "retirado": [
       false,
       false
+    ]
+  },
+  {
+    "conductor": "LUCY LONGIN",
+    "vehiculo": "RENAULT FLUENCE / NEGRO / WLG 932",
+    "nroAuto": "2",
+    "alumnos": [
+      "MAXIMO SOSA",
+      "JOAQUINA SOSA"
+    ],
+    "noAutorizado": false,
+    "enviadoAcceso": [
+      true,
+      true
+    ],
+    "retirado": [
+      true,
+      true
     ]
   }
 ]
