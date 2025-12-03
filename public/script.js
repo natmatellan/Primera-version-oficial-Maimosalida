@@ -313,6 +313,40 @@ function exportarCSV() {
 }
 
 
+function exportarJSON() {
+  fetch('/api/registros')
+    .then(res => res.json())
+    .then(registros => {
+      if (!registros || registros.length === 0) {
+        alert("No hay registros para exportar.");
+        return;
+      }
+
+      // Guardamos el array tal cual lo devuelve el backend
+      const contenido = JSON.stringify(registros, null, 2);
+
+      const blob = new Blob([contenido], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "salidas.json";
+      a.style.display = "none";
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    })
+    .catch(err => {
+      console.error('❌ Error al exportar JSON:', err);
+      alert("No se pudieron obtener los registros para exportar en JSON.");
+    });
+}
+
+
+
 
 function limpiarListado() {
   if (!confirm("¿Estás seguro de que querés borrar todos los registros?")) return;

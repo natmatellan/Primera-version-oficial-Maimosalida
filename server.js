@@ -260,13 +260,23 @@ const usuariosValidos = {
 
   // 👉 Ejemplos de usuarios nuevos (podés cambiarlos)
   Nat: {
-    password: "nat2024",
+    password: "dcmftcjnk2025",
     nombre: "Nat",
-    rol: "operador"
+    rol: "admin"
   },
   acceso1: {
-    password: "acceso123",
+    password: "barujhashem700",
     nombre: "Puesto Acceso 1",
+    rol: "operador"
+  },
+  periferia: {
+    password: "carganombres5000",
+    nombre: "Periferia1",
+    rol: "operador"
+  },
+    Rosh1: {
+    password: "nuncaunrodriguez5786",
+    nombre: "Mati",
     rol: "operador"
   }
 };
