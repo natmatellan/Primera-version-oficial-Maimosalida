@@ -232,9 +232,9 @@ server.listen(PORT, () => {
 // Usuarios válidos SOLO en el servidor
 // Podés agregar más acá
 const usuariosValidos = {
-  Direccion: {
+ Directortt: {
     password: "maimodire750",
-    nombre: "Administrador",
+    nombre: "Meir",
     rol: "admin"
   },
   LucasHubscher: {
@@ -247,9 +247,9 @@ const usuariosValidos = {
     nombre: "Jero Correa",
     rol: "operador"
   },
-  carla: {
-    password: "clave456",
-    nombre: "Carla",
+  Maimoacceso1: {
+    password: "magnetorojo",
+    nombre: "Directivo de acceso 1",
     rol: "operador"
   },
   mariana: {
