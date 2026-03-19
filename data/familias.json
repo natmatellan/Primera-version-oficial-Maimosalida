@@ -74,7 +74,7 @@
       "AKKAUY ESQUEL LUCIANO"
     ],
     "vehiculos": [
-      "NON-REGISTERED"
+     "HONDA HRV GRIS / AB 456 NG", "NON-REGISTERED"
     ]
   },
 
@@ -330,7 +330,7 @@
   
   {
     "parientes": [
-      "MAMA COHEN 1", "PAPA COHEN 1"
+      "MELANY COHEN", "PAPA COHEN"
     ],
     "alumnos": [
       "COHEN EFRAHIM",
@@ -344,29 +344,55 @@
 
   {
     "parientes": [
-      "MAMA COHEN 2", "PAPA COHEN 2"
+      "LUCIANA COHEN", "BRIAN COHEN"
     ],
     "alumnos": [
       "COHEN YAEL BEATRIZ", "COHEN BENJAMIN ITZJAK"
     ],
     "vehiculos": [
-     "VOLVO XC90 / NEGRO / AB 234 NR", "NON-REGISTERED"
+     "FORD TERRITORY / BLANCO / AF 196 EI", "NON-REGISTERED"
     ]
   },
 
 
   {
     "parientes": [
-      "MAMA COHEN 3", "PAPA COHEN 3"
+      "JENIFER COHEN", "JONATAHN COHEN 3"
     ],
     "alumnos": [
-      "COHEN MIRIAM", "COHEN ADINA SHIREL",
-      "COHEN ESTHER", "COHEN SHOSHANA TIFERET",
-      "COHEN ELIAHU",
+      "COHEN MIRIAM",
+      "COHEN ESTHER",
       "COHEN MIJAL"
     ],
     "vehiculos": [
      "KIA CARNIVAL / NEGRO / AD 975 TH", "NON-REGISTERED"
+    ]
+  },
+
+
+    {
+    "parientes": [
+      "SALOME COHEN", "EZEQUIEL COHEN"
+    ],
+    "alumnos": [
+      "COHEN SHOSHANA TIFERET",
+    ],
+    "vehiculos": [
+     "NON-REGISTERED"
+    ]
+  },
+
+
+  {
+    "parientes": [
+      "MELINA COHEN", "NATAN COHEN"
+    ],
+    "alumnos": [
+      "COHEN ADINA SHIREL",
+      "COHEN ELIAHU"
+    ],
+    "vehiculos": [
+      "NON-REGISTERED"
     ]
   },
 
@@ -401,12 +427,25 @@
       "MAMA DAYAN", "GABRIEL DAYAN"
     ],
     "alumnos": [
-      "DAYAN JANA RAJEL", "DAYAN MEITAL DANIELA"
+      "DAYAN JANA RAJEL"
     ],
     "vehiculos": [
       "NON-REGISTERED"
     ]
   },
+
+  {
+    "parientes": [
+      "VANESA DAYAN", "PAPA DAYAN"
+    ],
+    "alumnos": [
+      "DAYAN MEITAL DANIELA"
+    ],
+    "vehiculos": [
+      "NON-REGISTERED"
+    ]
+  },
+
 
   
   {
@@ -417,7 +456,7 @@
       "DE BOTON SARA ADINA"
     ],
     "vehiculos": [
-      "NON-REGISTERED"
+      "NISSAN VERSA / NEGRO / AE 157 OJ", "NON-REGISTERED"
     ]
   },
 
@@ -669,7 +708,7 @@
       "HOMSANI SARAH ODAIA"
     ],
     "vehiculos": [
-      "NON-REGISTERED"
+     "HONDA CRV / BLANCO / AB 824 TW", "NON-REGISTERED"
     ]
   },
 
@@ -722,7 +761,7 @@
       "JALABE SHLOMO NAJMAN", "JALABE SARA NAOMI"
     ],
     "vehiculos": [
-     "VW TIGUAN / BLANCO / AC 988 MA", "NON-REGISTERED"
+     "VW TIGUAN / BLANCO / AC 988 MA", "CHEVROLET TRACKER / AZUL / AG 357 ZO", "NON-REGISTERED"
     ]
   },
 
@@ -894,7 +933,7 @@
       "MENALLED ILAN IEHUDA"
     ],
     "vehiculos": [
-      "NON-REGISTERED"
+     "ETIOS BLANCO / AF 954 FD", "NON-REGISTERED"
     ]
   },
 
@@ -1278,7 +1317,7 @@
       "SOAE YASMIN", "SOAE BENJAMIN YOEL"
     ],
     "vehiculos": [
-      "NON-REGISTERED"
+      "NISSAN KICK / NEGRO / AG 244 KP", "NON-REGISTERED"
     ]
   },
 
